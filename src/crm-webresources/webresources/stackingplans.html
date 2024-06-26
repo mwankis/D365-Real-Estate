@@ -1,0 +1,230 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <style>
+        .suites-floor-row {
+            display: flex;
+            /*height: 80px;*/
+        }
+
+        p {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="plan-container-div">
+
+    </div>
+    <br />
+    <div id="key-row-div" style="margin:auto;width:90%">
+
+    </div>
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", async () => {
+            await addSuitesToThePlan();
+        });
+
+        async function addSuitesToThePlan() {
+            var buildingId = parent.Xrm.Page.data.entity.getId().replace("{", "").replace("}", "");
+            var numberOfStories = parent.Xrm.Page.getAttribute("erp_stories").getValue();
+            var isComplexplan = parent.Xrm.Page.getAttribute("erp_iscomplexplan").getValue();
+            for (var i = numberOfStories; i > 0; i--) {
+                var floorSuites = await getBuildingSuites(buildingId, i);
+                drawFloorSuitesOnPlan(floorSuites, i, isComplexplan);
+            }
+            addKeyRowDiv();
+        }
+
+        async function getBuildingSuites(buildingId, floor) {
+            var queryFilter = "$filter=(_erp_buildingid_value eq " + buildingId + " and erp_floor eq " + floor + ")";
+            var querySelect = "?$select=erp_floor,erp_leasecommencement,erp_leaseexpiration,erp_rsf,erp_suitenumber,_erp_tenantid_value";
+            var queryOrderBy = "$orderby=erp_suitenumber asc";
+            var selectQuery = querySelect + "&" + queryFilter + "&" + queryOrderBy;
+            var results = await parent.Xrm.WebApi.retrieveMultipleRecords("erp_suites", selectQuery);
+            var suites = results.entities;
+            var filteredSuites = removePreviousYearsLease(suites);
+            return filteredSuites;
+        }
+
+        function drawFloorSuitesOnPlan(floorSuites, floor, isComplexplan) {
+            if (floorSuites.length == 0) {
+                return;
+            }
+            var totalRSF = 0; var max_rfs = 0; var max_rfsCalculated = false;
+            var suitesHtml = `<div style="width:1%">
+                                    <b>${floor}</b>
+                                  </div>`;
+            for (var i = 0; i < floorSuites.length; i++) {
+                var rfs = floorSuites[i].erp_rsf;
+                totalRSF += rfs;
+                if (max_rfs < rfs) {
+                    max_rfs = rfs;
+                }
+            }
+
+            for (var i = 0; i < floorSuites.length; i++) {
+                var x = floorSuites[i];
+                var per = (x.erp_rsf / totalRSF) * 100;
+                if (isComplexplan) {
+                   per = 100 / floorSuites.length;
+                }
+                if (x.erp_rsf == max_rfs && !max_rfsCalculated) {
+                    per = per - 1;
+                    max_rfsCalculated = true;
+                }
+                var tenant = x["_erp_tenantid_value@OData.Community.Display.V1.FormattedValue"];
+                var suitenumber = x["erp_suitenumber"];
+                var rsfValue = x["erp_rsf"];
+                var rsf = getFormattedNumber(rsfValue);
+                var occupationStatus = "Vacant";
+                var bg_color = "#FF9999";
+                var leaseExpiryDate = '';
+                if (tenant != undefined) {
+                    occupationStatus = tenant;
+                    var dateFromString = x["erp_leaseexpiration"];
+                    leaseExpiryDate = getFormartedDate(dateFromString);
+                    bg_color = getBackgroundColour(dateFromString);
+                    leaseExpiryDateHtml = ` <p style="color:black;margin-top:-12px;">${leaseExpiryDate}</p>`;
+                }
+                var borderStyle = ``;
+                if (i != 0) {
+                    borderStyle = `border-left: 3px solid white;`;
+                }
+
+                var suiteHtml = `<div class="box" style="font-size:12px;text-align:center;word-wrap:break-word;width:${per}%;background-color:${bg_color};
+                                     ${borderStyle}">
+                                       <p> ${occupationStatus} <br/> Suite:${suitenumber} | ${rsf} SF <br/> ${leaseExpiryDate} </p>
+                                    </div>`;
+                suitesHtml += suiteHtml;
+            }
+
+            var box_marginbottom = ``;
+            if (floor != 1) {
+                box_marginbottom = "margin-bottom:3px;"
+            }
+            var planContainer = document.getElementById("plan-container-div");
+            var floordiv = `<div class="suites-floor-row" style="display: flex;min-height:65px;${box_marginbottom}">
+                                  ${suitesHtml}
+                                </div>`;
+            planContainer.innerHTML += floordiv;
+        }
+
+        function removePreviousYearsLease(suites) {
+            try {
+                var currentDate = new Date();
+                var currentYear = currentDate.getFullYear();
+                debugger;
+                suites.forEach(suite => {
+                    var stringDate = suite["erp_leaseexpiration"];
+                    if (stringDate != null) { // stringDate != "" || 
+                        var dateFromString = new Date(stringDate);
+                        var leaseYear = dateFromString.getFullYear();
+                        if (leaseYear < currentYear) {
+                            suites = suites.filter(item => item !== suite);
+                        }
+                    }
+                });
+                return suites;
+            } catch (e) {
+                return suites;
+            }
+        }
+
+        function getFormattedNumber(numberString) {
+            try {
+                return numberString.toLocaleString();
+            } catch (e) {
+                return numberString;
+            }
+        }
+
+        function getFormartedDate(stringDate) {
+            if (stringDate) {
+                var dateFromString = new Date(stringDate);
+                var year = dateFromString.getFullYear();
+                var month = String(dateFromString.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+                var day = String(dateFromString.getDate()).padStart(2, '0');
+
+                var formattedDate = `${month}/${day}/${year} `;
+                return formattedDate;
+            }
+            return "";
+        }
+
+        function addKeyRowDiv() {
+            var currentDate = new Date();
+            var currentYear = currentDate.getFullYear();
+
+            var borderStyle = `border-left: 2px solid white;`;
+            var keyrowHtml = ``;
+            var keysItems = [
+                { year: "Vacant", color: "#FF9999", per: 12.5 },
+                { year: `Unknown`, color: "#EDEDED", per: 12.5 },
+                { year: currentYear, color: "#FFD4B7", per: 12.5 },
+                { year: currentYear + 1, color: "#FFF3CC", per: 12.5 },
+                { year: currentYear + 2, color: "#FFDFFF", per: 12.5 },
+                { year: currentYear + 3, color: "#CDF7FF", per: 12.5 },
+                { year: currentYear + 4, color: "#B5CBE0", per: 12.5 },
+                { year: `${(currentYear + 5)}+`, color: "#C7C7C7", per: 12.5 }
+            ];
+
+            for (var i = 0; i < keysItems.length; i++) {
+                var keyItem = keysItems[i];
+                var keyHtml = `<div class="box" style="width:${keyItem.per}%;background-color:${keyItem.color};
+                                    text-align: center;${borderStyle}">
+                                       <p style="color:black;margin-top:9px;"><b>${keyItem.year}</b></p>
+                                    </div>`;
+                keyrowHtml += keyHtml;
+            }
+
+            var key_row_div = document.getElementById("key-row-div");
+            var keydiv = `<div class="key-floor-row" style="display: flex;height: 40px;">
+                                  ${keyrowHtml}
+                                </div>`;
+            key_row_div.innerHTML += keydiv;
+        }
+
+        function getBackgroundColour(leaseExpirationDateString) {
+            debugger;
+            if (leaseExpirationDateString == "" || leaseExpirationDateString == null) {
+                return "#EDEDED";
+            }
+            var currentDate = new Date();
+            var currentYear = currentDate.getFullYear();
+
+            var leaseExpirationDate = new Date(leaseExpirationDateString);
+            var leaseExpirationYear = leaseExpirationDate.getFullYear();
+
+            if (leaseExpirationYear < currentYear) {
+                return "#8a8a5c";
+            }
+
+            if (leaseExpirationYear == currentYear) {
+                return "#FFD4B7";
+            }
+
+            if (leaseExpirationYear == (currentYear + 1)) {
+                return "#FFF3CC";
+            }
+
+            if (leaseExpirationYear == (currentYear + 2)) {
+                return "#FFDFFF";
+            }
+
+            if (leaseExpirationYear == (currentYear + 3)) {
+                return "#CDF7FF";
+            }
+
+            if (leaseExpirationYear == (currentYear + 4)) {
+                return "#B5CBE0";
+            }
+
+            return "#C7C7C7";
+        }
+    </script>
+</body>
+</html>
