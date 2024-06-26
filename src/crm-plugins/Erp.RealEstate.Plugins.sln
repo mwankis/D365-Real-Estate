@@ -1,0 +1,68 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32630.192
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Erp.RealEstate.Plugins", "Erp.RealEstate.Plugins.csproj", "{52E848A0-519A-464B-9EFC-AB4F1E9BD475}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D3BB8AB4-3C2E-451D-912D-F90EDD04E879}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "webresources", "webresources", "{7FF3B212-D971-43FE-9C54-B42BA4023B82}"
+	ProjectSection(SolutionItems) = preProject
+		audityhistory.html = audityhistory.html
+		backupworking.html = backupworking.html
+		buildingfilesupload.html = buildingfilesupload.html
+		companyfilesupload.html = companyfilesupload.html
+		contactfilesupload.html = contactfilesupload.html
+		draganddrop.html = draganddrop.html
+		HTMLPage1.html = HTMLPage1.html
+		HTMLPage2.html = HTMLPage2.html
+		opportunityfilesupload.html = opportunityfilesupload.html
+		stackingplans.html = stackingplans.html
+		suitefilesupload.html = suitefilesupload.html
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "js", "js", "{2B2BCE6B-3FCF-494F-B20A-348B89C7BE3E}"
+	ProjectSection(SolutionItems) = preProject
+		accountform.js = accountform.js
+		accountformjs2.js = accountformjs2.js
+		accountribbon.js = accountribbon.js
+		audithistory.js = audithistory.js
+		buildingform.js = buildingform.js
+		common.js = common.js
+		contactform.js = contactform.js
+		meetingribbon.js = meetingribbon.js
+		suiteform.js = suiteform.js
+		taskform.js = taskform.js
+		opportunityform.js = opportunityform.js
+		taskribbon.js = taskribbon.js
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Erp.RealEstate.Processes", "..\Erp.RealEstate.Processes\Erp.RealEstate.Processes.csproj", "{9CC28FDE-83E1-44AF-83B1-CE6D7B708F60}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{52E848A0-519A-464B-9EFC-AB4F1E9BD475}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52E848A0-519A-464B-9EFC-AB4F1E9BD475}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52E848A0-519A-464B-9EFC-AB4F1E9BD475}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52E848A0-519A-464B-9EFC-AB4F1E9BD475}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9CC28FDE-83E1-44AF-83B1-CE6D7B708F60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CC28FDE-83E1-44AF-83B1-CE6D7B708F60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CC28FDE-83E1-44AF-83B1-CE6D7B708F60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CC28FDE-83E1-44AF-83B1-CE6D7B708F60}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7FF3B212-D971-43FE-9C54-B42BA4023B82} = {D3BB8AB4-3C2E-451D-912D-F90EDD04E879}
+		{2B2BCE6B-3FCF-494F-B20A-348B89C7BE3E} = {D3BB8AB4-3C2E-451D-912D-F90EDD04E879}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2148C284-2F75-4730-9178-06501E715998}
+	EndGlobalSection
+EndGlobal
